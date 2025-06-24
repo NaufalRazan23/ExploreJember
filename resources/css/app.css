@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+    body {
+        @apply bg-gray-50 text-gray-900 antialiased font-sans;
+    }
+    h1 {
+        @apply text-4xl font-bold text-gray-900;
+    }
+    h2 {
+        @apply text-2xl font-bold text-gray-900;
+    }
+    h3 {
+        @apply text-xl font-semibold text-gray-900;
+    }
+    p {
+        @apply text-gray-600;
+    }
+}
+
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg text-base font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    }
+    .btn-primary {
+        @apply btn bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+    }
+    .btn-secondary {
+        @apply btn bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500;
+    }
+    .card {
+        @apply bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300;
+    }
+    .form-input {
+        @apply mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+    }
+    .form-label {
+        @apply block text-sm font-medium text-gray-700;
+    }
+    .section-title {
+        @apply text-2xl md:text-3xl font-bold text-gray-900 mb-2;
+    }
+    .section-subtitle {
+        @apply text-gray-600 mb-8;
+    }
+}
