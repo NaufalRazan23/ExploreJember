@@ -10,8 +10,14 @@
             <h1 class="text-3xl font-bold text-gray-900">Dashboard Admin</h1>
             <p class="text-gray-600 mt-2">Selamat datang, {{ auth()->user()->name }}!</p>
         </div>
+    </div>
 
-
+    <!-- Visitor Chart by Category -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik Pengunjung Berdasarkan Kategori Wisata</h3>
+        <div class="relative h-80">
+            <canvas id="visitorsChart"></canvas>
+        </div>
     </div>
 
     <!-- Stats Cards -->
@@ -155,4 +161,94 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Data dari PHP
+    const categoryData = @json($visitorsByCategory);
+
+    const labels = categoryData.map(item => item.name);
+    const data = categoryData.map(item => item.total_visitors);
+
+    // Warna untuk setiap kategori
+    const colors = [
+        'rgba(34, 197, 94, 0.8)',   // Green untuk Alam
+        'rgba(59, 130, 246, 0.8)',  // Blue untuk Pantai
+        'rgba(245, 158, 11, 0.8)',  // Orange untuk Kuliner
+        'rgba(168, 85, 247, 0.8)',  // Purple untuk Budaya
+        'rgba(239, 68, 68, 0.8)'    // Red untuk Edukasi
+    ];
+
+    const borderColors = [
+        'rgba(34, 197, 94, 1)',
+        'rgba(59, 130, 246, 1)',
+        'rgba(245, 158, 11, 1)',
+        'rgba(168, 85, 247, 1)',
+        'rgba(239, 68, 68, 1)'
+    ];
+
+    const ctx = document.getElementById('visitorsChart').getContext('2d');
+    const visitorsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Jumlah Pengunjung',
+                data: data,
+                backgroundColor: colors.slice(0, labels.length),
+                borderColor: borderColors.slice(0, labels.length),
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Tingkat Kunjungan Berdasarkan Kategori Wisata',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    color: '#1f2937'
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(156, 163, 175, 0.2)'
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        color: '#6b7280'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6b7280',
+                        font: {
+                            weight: 'bold'
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+});
+</script>
 @endsection

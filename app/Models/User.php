@@ -58,4 +58,12 @@ class User extends Authenticatable
     {
         return $this->role === 'user';
     }
+
+    /**
+     * User's visit forms
+     */
+    public function visitForms()
+    {
+        return $this->hasMany(\App\Models\VisitForm::class);
+    }
 }

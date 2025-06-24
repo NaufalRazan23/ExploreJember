@@ -74,7 +74,23 @@ class DestinationController extends Controller
      */
     public function show(Destination $destination)
     {
-        return view('destinations.show', compact('destination'));
+        $relatedWisata = Destination::where('category_id', $destination->category_id)
+                                  ->where('id', '!=', $destination->id)
+                                  ->take(4)
+                                  ->get();
+
+        // Get user's visit form if authenticated and is a user
+        $userVisitForm = null;
+        if (auth()->check() && auth()->user()->isUser()) {
+            $userVisitForm = $destination->visitForms()
+                                        ->where('user_id', auth()->id())
+                                        ->first();
+        }
+
+        // Get total visitors count
+        $totalVisitors = $destination->total_visitors;
+
+        return view('destinations.show', compact('destination', 'relatedWisata', 'userVisitForm', 'totalVisitors'));
     }
 
     /**

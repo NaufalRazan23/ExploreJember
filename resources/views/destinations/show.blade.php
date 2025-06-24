@@ -166,6 +166,50 @@
             </div>
         </div>
 
+        <!-- Visit Form Section (Only for Users) -->
+        @auth
+            @if(auth()->user()->isUser())
+                <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Form Kunjungan</h3>
+                        <p class="text-gray-600 mb-6">Bagikan pengalaman kunjungan Anda ke {{ $destination->name }}</p>
+
+                        <div class="mt-6">
+                            <button type="button" onclick="openVisitFormModal()" id="visitFormButton"
+                                   class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                @if(isset($userVisitForm) && $userVisitForm)
+                                    📝 Edit Form Kunjungan
+                                @else
+                                    ✍️ Isi Form Kunjungan
+                                @endif
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <span class="text-red-700">Hanya user yang bisa mengisi form kunjungan.</span>
+                    </div>
+                </div>
+            @endif
+        @else
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-8">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="text-gray-600">Silakan login sebagai user untuk mengisi form kunjungan.</span>
+                </div>
+            </div>
+        @endauth
+
         <!-- Back Button -->
         <div class="flex justify-between items-center mb-8">
             <a href="{{ route('destinations.index') }}"
@@ -187,4 +231,307 @@
             @endif
         </div>
     </div>
+
+<!-- Visit Form Modal -->
+@auth
+@if(auth()->user()->isUser())
+<div id="visitFormModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center pb-3">
+                <h3 class="text-lg font-bold text-gray-900">Form Kunjungan - {{ $destination->name }}</h3>
+                <button onclick="closeVisitFormModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form id="visitForm" class="space-y-4">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Visit Date -->
+                    <div>
+                        <label for="visit_date" class="block text-sm font-medium text-gray-700">Tanggal Kunjungan *</label>
+                        <input type="date" id="visit_date" name="visit_date" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                               min="{{ date('Y-m-d') }}">
+                    </div>
+
+                    <!-- Visit Type -->
+                    <div>
+                        <label for="visit_type" class="block text-sm font-medium text-gray-700">Jenis Kunjungan *</label>
+                        <select id="visit_type" name="visit_type" required onchange="toggleGroupSize()"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Pilih jenis kunjungan</option>
+                            <option value="sendirian">Sendirian</option>
+                            <option value="rombongan">Rombongan</option>
+                        </select>
+                    </div>
+
+                    <!-- Arrival Time -->
+                    <div>
+                        <label for="arrival_time" class="block text-sm font-medium text-gray-700">Waktu Datang *</label>
+                        <input type="time" id="arrival_time" name="arrival_time" required onchange="validateTimes()"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <!-- Departure Time -->
+                    <div>
+                        <label for="departure_time" class="block text-sm font-medium text-gray-700">Waktu Pergi *</label>
+                        <input type="time" id="departure_time" name="departure_time" required onchange="validateTimes()"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <p id="time-error" class="text-red-500 text-xs mt-1 hidden">Waktu pergi harus lebih lambat dari waktu datang</p>
+                    </div>
+                </div>
+
+                <!-- Group Size (Hidden by default) -->
+                <div id="groupSizeContainer" class="hidden">
+                    <label for="group_size" class="block text-sm font-medium text-gray-700">Jumlah Orang *</label>
+                    <input type="number" id="group_size" name="group_size" min="2" max="100"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Minimal 2 orang">
+                </div>
+
+                <!-- Suggestions -->
+                <div>
+                    <label for="suggestions" class="block text-sm font-medium text-gray-700">Saran untuk Tempat Wisata</label>
+                    <textarea id="suggestions" name="suggestions" rows="3" maxlength="1000"
+                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Berikan saran untuk pengembangan tempat wisata ini..."></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Maksimal 1000 karakter</p>
+                </div>
+
+                <!-- Review -->
+                <div>
+                    <label for="review" class="block text-sm font-medium text-gray-700">Review Tempat Wisata</label>
+                    <textarea id="review" name="review" rows="3" maxlength="1000"
+                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Bagikan pengalaman atau review Anda tentang tempat wisata ini..."></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Maksimal 1000 karakter</p>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-between items-center pt-4">
+                    <div>
+                        @if($userVisitForm)
+                        <button type="button" onclick="deleteVisitForm()"
+                                class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            Hapus Form
+                        </button>
+                        @endif
+                    </div>
+                    <div class="space-x-2">
+                        <button type="button" onclick="closeVisitFormModal()"
+                                class="px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            Batal
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
+@endauth
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing visit form functionality...');
+
+    // Modal Functions
+    window.openVisitFormModal = function() {
+        console.log('Opening visit form modal...');
+        const modal = document.getElementById('visitFormModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            loadExistingData();
+        } else {
+            console.error('Modal element not found!');
+        }
+    }
+
+    window.closeVisitFormModal = function() {
+        console.log('Closing visit form modal...');
+        const modal = document.getElementById('visitFormModal');
+        const form = document.getElementById('visitForm');
+        const groupContainer = document.getElementById('groupSizeContainer');
+
+        if (modal) modal.classList.add('hidden');
+        if (form) form.reset();
+        if (groupContainer) groupContainer.classList.add('hidden');
+    }
+
+    // Toggle group size field based on visit type
+    window.toggleGroupSize = function() {
+        const visitType = document.getElementById('visit_type').value;
+        const groupSizeContainer = document.getElementById('groupSizeContainer');
+        const groupSizeInput = document.getElementById('group_size');
+
+        if (visitType === 'rombongan') {
+            groupSizeContainer.classList.remove('hidden');
+            groupSizeInput.required = true;
+        } else {
+            groupSizeContainer.classList.add('hidden');
+            groupSizeInput.required = false;
+            groupSizeInput.value = '';
+        }
+    }
+
+    // Validate that departure time is after arrival time
+    window.validateTimes = function() {
+        const arrivalTime = document.getElementById('arrival_time').value;
+        const departureTime = document.getElementById('departure_time').value;
+        const errorElement = document.getElementById('time-error');
+        const submitButton = document.querySelector('#visitForm button[type="submit"]');
+
+        if (arrivalTime && departureTime) {
+            if (departureTime <= arrivalTime) {
+                if (errorElement) errorElement.classList.remove('hidden');
+                if (submitButton) submitButton.disabled = true;
+                return false;
+            } else {
+                if (errorElement) errorElement.classList.add('hidden');
+                if (submitButton) submitButton.disabled = false;
+                return true;
+            }
+        }
+        return true;
+    }
+
+    // Load existing form data if user has already filled the form
+    function loadExistingData() {
+        @if(isset($userVisitForm) && $userVisitForm)
+        try {
+            document.getElementById('visit_date').value = '{{ $userVisitForm->visit_date->format('Y-m-d') }}';
+            document.getElementById('arrival_time').value = '{{ substr($userVisitForm->arrival_time, 0, 5) }}';
+            document.getElementById('departure_time').value = '{{ substr($userVisitForm->departure_time, 0, 5) }}';
+            document.getElementById('visit_type').value = '{{ $userVisitForm->visit_type }}';
+            document.getElementById('suggestions').value = '{{ $userVisitForm->suggestions }}';
+            document.getElementById('review').value = '{{ $userVisitForm->review }}';
+
+            @if($userVisitForm->visit_type === 'rombongan')
+            document.getElementById('group_size').value = '{{ $userVisitForm->group_size }}';
+            toggleGroupSize();
+            @endif
+        } catch (error) {
+            console.error('Error loading existing data:', error);
+        }
+        @endif
+    }
+
+    // Submit form via AJAX
+    const visitForm = document.getElementById('visitForm');
+    if (visitForm) {
+        visitForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Form submitted');
+
+            // Validate times before submitting
+            if (!validateTimes()) {
+                alert('Pastikan waktu pergi lebih lambat dari waktu datang!');
+                return;
+            }
+
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.textContent = 'Menyimpan...';
+
+            fetch('{{ route('user.visit-form.store', $destination) }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeVisitFormModal();
+                    location.reload(); // Reload to update visitor count
+                } else {
+                    alert('Terjadi kesalahan: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (error.message) {
+                    alert('Terjadi kesalahan: ' + error.message);
+                } else if (error.errors) {
+                    // Handle validation errors
+                    let errorMessage = 'Validation errors:\n';
+                    for (let field in error.errors) {
+                        errorMessage += error.errors[field].join('\n') + '\n';
+                    }
+                    alert(errorMessage);
+                } else {
+                    alert('Terjadi kesalahan saat menyimpan form.');
+                }
+            })
+            .finally(() => {
+                // Re-enable submit button
+                submitButton.disabled = false;
+                submitButton.textContent = 'Simpan';
+            });
+        });
+    }
+
+    // Delete form function
+    @if(isset($userVisitForm) && $userVisitForm)
+    window.deleteVisitForm = function() {
+        if (confirm('Apakah Anda yakin ingin menghapus form kunjungan ini?')) {
+            fetch('{{ route('user.visit-form.destroy', $destination) }}', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closeVisitFormModal();
+                    location.reload(); // Reload to update visitor count
+                } else {
+                    alert('Terjadi kesalahan: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menghapus form.');
+            });
+        }
+    }
+    @endif
+
+    // Close modal when clicking outside
+    const modal = document.getElementById('visitFormModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVisitFormModal();
+            }
+        });
+    }
+
+    console.log('Visit form functionality initialized successfully');
+});
+</script>
 @endsection

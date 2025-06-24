@@ -48,7 +48,18 @@ class HomeController extends Controller
                                   ->take(4)
                                   ->get();
 
-        return view('wisata.show', compact('destination', 'relatedWisata'));
+        // Get user's visit form if authenticated and is a user
+        $userVisitForm = null;
+        if (auth()->check() && auth()->user()->isUser()) {
+            $userVisitForm = $destination->visitForms()
+                                        ->where('user_id', auth()->id())
+                                        ->first();
+        }
+
+        // Get total visitors count
+        $totalVisitors = $destination->total_visitors;
+
+        return view('wisata.show', compact('destination', 'relatedWisata', 'userVisitForm', 'totalVisitors'));
     }
 
     /**

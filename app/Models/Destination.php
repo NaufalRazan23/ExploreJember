@@ -38,4 +38,27 @@ class Destination extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    /**
+     * Destination's visit forms
+     */
+    public function visitForms()
+    {
+        return $this->hasMany(\App\Models\VisitForm::class);
+    }
+
+    /**
+     * Get total visitors count for this destination
+     * Counts actual number of people (1 for sendirian, group_size for rombongan)
+     */
+    public function getTotalVisitorsAttribute()
+    {
+        return $this->visitForms()
+            ->selectRaw('SUM(CASE
+                WHEN visit_type = "sendirian" THEN 1
+                WHEN visit_type = "rombongan" THEN group_size
+                ELSE 0
+            END) as total')
+            ->value('total') ?? 0;
+    }
 }

@@ -14,20 +14,43 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create default admin user
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@lensajember.com',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-        ]);
+        // Create default admin user (from setup guide)
+        User::firstOrCreate(
+            ['email' => 'admin@admin.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ]
+        );
 
-        // Create sample regular user
-        User::create([
-            'name' => 'User Demo',
-            'email' => 'user@lensajember.com',
-            'password' => Hash::make('user123'),
-            'role' => 'user',
-        ]);
+        // Create sample regular user (from setup guide)
+        User::firstOrCreate(
+            ['email' => 'user@user.com'],
+            [
+                'name' => 'User Demo',
+                'password' => Hash::make('password'),
+                'role' => 'user',
+            ]
+        );
+
+        // Keep existing users if they exist
+        User::firstOrCreate(
+            ['email' => 'admin@lensajember.com'],
+            [
+                'name' => 'Admin Lensa',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'user@lensajember.com'],
+            [
+                'name' => 'User Lensa',
+                'password' => Hash::make('user123'),
+                'role' => 'user',
+            ]
+        );
     }
 }

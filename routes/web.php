@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WisataController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\ProfileController;
+use App\Http\Controllers\User\VisitFormController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\CategoryController;
 use App\Models\Category;
@@ -42,13 +43,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'login']);
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register']);
-});
+});    // All website features require authentication
+    Route::middleware('auth')->group(function () {
+        Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// All website features require authentication
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-    // Main website routes (READ ONLY - accessible by both admin and user)
+        // Main website routes (READ ONLY - accessible by both admin and user)
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/wisata/{destination:slug}', [HomeController::class, 'show'])->name('wisata.show');
     Route::get('/search', [HomeController::class, 'search'])->name('search');
@@ -66,6 +65,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+        // Visit Form Routes
+        Route::post('/wisata/{destination}/visit-form', [VisitFormController::class, 'store'])->name('visit-form.store');
+        Route::get('/wisata/{destination}/visit-form', [VisitFormController::class, 'show'])->name('visit-form.show');
+        Route::delete('/wisata/{destination}/visit-form', [VisitFormController::class, 'destroy'])->name('visit-form.destroy');
     });
 
     // Admin Protected Routes (only for admins)
