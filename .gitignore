@@ -25,3 +25,10 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Compiled binaries
+a.out
+*.exe
+*.o
+*.so
+*.dll
